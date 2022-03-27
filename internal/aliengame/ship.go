@@ -1,6 +1,7 @@
 package aliengame
 
 import (
+	"github.com/kvartborg/vector"
 	"github.com/solarlune/resolv"
 )
 
@@ -15,7 +16,8 @@ type Ship struct {
 }
 
 func NewShip(x int, y int) *resolv.Object {
-	obj := resolv.NewObject(float64(x), float64(y), 32, 32)
+	w, h := shipImg.Size()
+	obj := resolv.NewObject(float64(x), float64(y), float64(w), float64(h))
 	obj.Data = &Ship{speed: 3, reloadTime: 10}
 	return obj
 }
@@ -59,7 +61,7 @@ func (s *Ship) Update(obj *resolv.Object, actions []Action) {
 	}
 }
 
-func (s *Ship) Collision(left *resolv.Object, right *resolv.Object) {
+func (s *Ship) Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector) {
 	return
 }
 
@@ -70,7 +72,8 @@ type Shell struct {
 }
 
 func NewShell(x float64, y float64) *resolv.Object {
-	obj := resolv.NewObject(x, y, 16, 16, "shell")
+	w, h := shellImg.Size()
+	obj := resolv.NewObject(x, y, float64(w), float64(h), "shell")
 	obj.Data = &Shell{0, -shellSpeed, 0}
 	return obj
 }
@@ -85,6 +88,6 @@ func (s Shell) Update(obj *resolv.Object, actions []Action) {
 	}
 }
 
-func (s Shell) Collision(left *resolv.Object, right *resolv.Object) {
+func (s Shell) Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector) {
 	return
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/kvartborg/vector"
 	"github.com/solarlune/resolv"
 	"image/color"
 	_ "image/png"
@@ -26,42 +27,37 @@ type Game struct {
 
 type GameObject interface {
 	Update(obj *resolv.Object, actions []Action)
-	Collision(left *resolv.Object, right *resolv.Object)
-}
-
-var shipImg *ebiten.Image
-var shellImg *ebiten.Image
-
-func init() {
-	var err error
-	shipImg, _, err = ebitenutil.NewImageFromFile("files/ship_0000.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	shellImg, _, err = ebitenutil.NewImageFromFile("files/tile_0000.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector)
 }
 
 func (g *Game) Update() error {
 
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 	controls := Control(g.keys)
+	dx, dy := shellImg.Size()
 	for _, obj := range g.Objects() {
-		gameObj, ok := obj.Data.(GameObject)
-		if collision := obj.Check(0, shellSpeed, "shell"); collision != nil {
-			if ok {
-				dist := collision.ContactWithObject(collision.Objects[0])
-				//fmt.Println(gameObj, dist)
-				if dist.Y() < 0 {
-					gameObj.Collision(obj, collision.Objects[0])
+		if collision := obj.Check(float64(dx), float64(dy), "shell"); collision != nil {
+			smallestDist := collision.ContactWithObject(collision.Objects[0])
+			closesObject := collision.Objects[0]
+			for i := range collision.Objects[1:] {
+				dist := collision.ContactWithObject(collision.Objects[i])
+				if smallestDist.X()+smallestDist.Y() > dist.Y()+dist.X() {
+					smallestDist = dist
+					closesObject = collision.Objects[i]
 				}
 			}
+			gameObj, ok := obj.Data.(GameObject)
+			if ok {
+				gameObj.Collision(obj, closesObject, smallestDist)
+			}
 		}
-		gameObj.Update(obj, controls)
+	}
+
+	for _, obj := range g.Objects() {
+		gameObj, ok := obj.Data.(GameObject)
+		if ok {
+			gameObj.Update(obj, controls)
+		}
 	}
 
 	AddAlien(g)
@@ -86,10 +82,26 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		case *Ship:
 			img = shipImg
 		case *Alien:
-			img = shipImg
+			img = alienImg
+			w, h := img.Size()
+			op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
 			op.GeoM.Rotate(math.Pi)
 		case *Shell:
 			img = shellImg
+		case *Explosion:
+			img = explosionImg
+			explosion := obj.Data.(*Explosion)
+			w, h := img.Size()
+			op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+			op.GeoM.Rotate(math.Pi * float64(explosion.Exists) / 180)
+			//var scale float64
+			//val := math.Pow(float64(explosion.Exists), 1.5)
+			//if val/(val/2) < 2 {
+			//	scale = val / (val / 2) / 120
+			//} else {
+			//	scale = val / (val / 2)
+			//}
+			//op.GeoM.Scale(scale, scale)
 		}
 
 		op.GeoM.Translate(obj.X, obj.Y)

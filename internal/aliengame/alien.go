@@ -1,6 +1,7 @@
 package aliengame
 
 import (
+	"github.com/kvartborg/vector"
 	"github.com/solarlune/resolv"
 	"math/rand"
 )
@@ -18,7 +19,8 @@ type Alien struct {
 }
 
 func NewAlien(x int, y int) *resolv.Object {
-	obj := resolv.NewObject(float64(x), float64(y), 32, 32)
+	w, h := alienImg.Size()
+	obj := resolv.NewObject(float64(x), float64(y), float64(w), float64(h))
 	obj.Data = &Alien{}
 	return obj
 }
@@ -44,9 +46,13 @@ func (a *Alien) Update(obj *resolv.Object, actions []Action) {
 	obj.Update()
 }
 
-func (a *Alien) Collision(left *resolv.Object, right *resolv.Object) {
+func (a *Alien) Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector) {
+	if dist.Y() > -8 || dist.X() > -3 {
+		return
+	}
 	_, shellCollision := right.Data.(*Shell)
 	if shellCollision {
+		right.Space.Add(NewExplosion(left.X, left.Y))
 		right.Space.Remove(right)
 		left.Space.Remove(left)
 	}
