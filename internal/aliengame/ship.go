@@ -1,7 +1,7 @@
 package aliengame
 
 import (
-	"github.com/kvartborg/vector"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/solarlune/resolv"
 )
 
@@ -14,6 +14,8 @@ type Ship struct {
 
 	speed int
 }
+
+var _ GameObject = (*Ship)(nil)
 
 func NewShip(x int, y int) *resolv.Object {
 	w, h := shipImg.Size()
@@ -61,8 +63,14 @@ func (s *Ship) Update(obj *resolv.Object, actions []Action) {
 	}
 }
 
-func (s *Ship) Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector) {
+func (s *Ship) Collision(left *resolv.Object, collision *resolv.Collision) {
 	return
+}
+
+func (s *Ship) Draw(obj *resolv.Object, screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(obj.X, obj.Y)
+	screen.DrawImage(shipImg, op)
 }
 
 type Shell struct {
@@ -88,6 +96,12 @@ func (s Shell) Update(obj *resolv.Object, actions []Action) {
 	}
 }
 
-func (s Shell) Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector) {
+func (a *Shell) Collision(left *resolv.Object, collision *resolv.Collision) {
 	return
+}
+
+func (s Shell) Draw(obj *resolv.Object, screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(obj.X, obj.Y)
+	screen.DrawImage(shellImg, op)
 }

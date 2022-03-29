@@ -1,8 +1,9 @@
 package aliengame
 
 import (
-	"github.com/kvartborg/vector"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/solarlune/resolv"
+	"math"
 	"math/rand"
 )
 
@@ -46,14 +47,27 @@ func (a *Alien) Update(obj *resolv.Object, actions []Action) {
 	obj.Update()
 }
 
-func (a *Alien) Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector) {
-	if dist.Y() > -8 || dist.X() > -3 {
-		return
+func (a *Alien) Collision(left *resolv.Object, collision *resolv.Collision) {
+
+	for _, right := range collision.Objects {
+		_, shellCollision := right.Data.(*Shell)
+		if shellCollision {
+			dist := collision.ContactWithObject(right)
+			if dist.Y() > -8 || dist.X() > -3 {
+				return
+			}
+			right.Space.Add(NewExplosion(left.X, left.Y))
+			right.Space.Remove(right)
+			left.Space.Remove(left)
+		}
 	}
-	_, shellCollision := right.Data.(*Shell)
-	if shellCollision {
-		right.Space.Add(NewExplosion(left.X, left.Y))
-		right.Space.Remove(right)
-		left.Space.Remove(left)
-	}
+}
+
+func (a *Alien) Draw(obj *resolv.Object, screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	w, h := alienImg.Size()
+	op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+	op.GeoM.Rotate(math.Pi)
+	op.GeoM.Translate(obj.X, obj.Y)
+	screen.DrawImage(alienImg, op)
 }

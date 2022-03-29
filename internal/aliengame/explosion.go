@@ -1,13 +1,20 @@
 package aliengame
 
 import (
-	"github.com/kvartborg/vector"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/solarlune/resolv"
+	"math"
 )
 
 type Explosion struct {
 	Exists int
 }
+
+func (e *Explosion) Collision(left *resolv.Object, collision *resolv.Collision) {
+	return
+}
+
+var _ GameObject = (*Explosion)(nil)
 
 func NewExplosion(x float64, y float64) *resolv.Object {
 	w, h := explosionImg.Size()
@@ -16,13 +23,21 @@ func NewExplosion(x float64, y float64) *resolv.Object {
 	return obj
 }
 
-func (s *Explosion) Update(obj *resolv.Object, actions []Action) {
-	s.Exists += 1
-	if s.Exists > 120 {
+func (e *Explosion) Update(obj *resolv.Object, actions []Action) {
+	e.Exists += 1
+	if e.Exists > 60 {
 		obj.Space.Remove(obj)
 	}
 }
 
-func (s *Explosion) Collision(left *resolv.Object, right *resolv.Object, dist vector.Vector) {
-	return
+func (e *Explosion) Draw(obj *resolv.Object, screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+
+	w, h := explosionImg.Size()
+	op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+	op.GeoM.Rotate(math.Pi * float64(e.Exists) / 180)
+	scale := math.Pow(float64(e.Exists), 2)/math.Pow(60, 2) + 1
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(obj.X, obj.Y)
+	screen.DrawImage(explosionImg, op)
 }
