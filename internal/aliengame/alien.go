@@ -53,12 +53,42 @@ func (a *Alien) Collision(left *resolv.Object, collision *resolv.Collision) {
 		_, shellCollision := right.Data.(*Shell)
 		if shellCollision {
 			dist := collision.ContactWithObject(right)
-			if dist.Y() > -8 || dist.X() > -3 {
+			if dist.Y() > -4 || dist.X() > -3 || dist.X() < -29 {
 				return
 			}
 			right.Space.Add(NewExplosion(left.X, left.Y))
 			right.Space.Remove(right)
 			left.Space.Remove(left)
+			// this 2 breaks improve performance drastically
+			break
+		}
+		_, explosionCollision := right.Data.(*Explosion)
+		if explosionCollision {
+			dist := collision.ContactWithObject(right)
+			if dist.Y() > -16 || dist.X() > -16 {
+				return
+			}
+			right.Space.Add(NewExplosion(left.X, left.Y))
+			left.Space.Remove(left)
+			break
+		}
+		_, bigShellCollision := right.Data.(*BigExplosion)
+		if bigShellCollision {
+			dist := collision.ContactWithObject(right)
+			if dist.Y() > -4 || dist.X() > -3 || dist.X() < -29 {
+				return
+			}
+			right.Space.Add(NewExplosion(left.X, left.Y))
+			for i := 0; i < 32; i++ {
+				angle := rand.Float64() * 2 * math.Pi
+				vx := 2 * math.Cos(angle)
+				vy := 2 * math.Sin(angle)
+				right.Space.Add(NewChildBigExplosion(left.X, left.Y, vx, vy))
+			}
+			right.Space.Remove(right)
+			left.Space.Remove(left)
+
+			break
 		}
 	}
 }

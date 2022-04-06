@@ -12,6 +12,7 @@ var (
 	environmentTiles *ebiten.Image
 	shipImg          *ebiten.Image
 	shellImg         *ebiten.Image
+	bigShellImg      *ebiten.Image
 	alienImg         *ebiten.Image
 	explosionImg     *ebiten.Image
 )
@@ -39,6 +40,7 @@ func init() {
 
 	shellImg = GetEnvironmentImage(0, 0, 5, 5, 0, 0)
 	explosionImg = GetEnvironmentImage(5, 0, 0, 0, 0, 0)
+	bigShellImg = GetEnvironmentImage(0, 1, 4, 4, 0, 0)
 
 }
 

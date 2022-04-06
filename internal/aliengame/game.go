@@ -34,7 +34,7 @@ func (g *Game) Update() error {
 
 	dx, dy := shellImg.Size()
 	for _, obj := range g.Objects() {
-		if collision := obj.Check(float64(dx), float64(dy), "shell"); collision != nil {
+		if collision := obj.Check(float64(dx), float64(dy), shellTag); collision != nil {
 			gameObj, ok := obj.Data.(GameObject)
 			if ok {
 				gameObj.Collision(obj, collision)
@@ -52,6 +52,9 @@ func (g *Game) Update() error {
 	}
 
 	AddAlien(g)
+	//if rand.Intn(10) == 0 {
+	//	AddAlien(g)
+	//}
 
 	return nil
 }

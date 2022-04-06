@@ -13,6 +13,7 @@ const (
 	MoveLeft
 	MoveRight
 	Shoot
+	BigShoot
 )
 
 func Control(keys []ebiten.Key) []Action {
@@ -33,6 +34,8 @@ func Control(keys []ebiten.Key) []Action {
 			vy += 1
 		case ebiten.KeyControl:
 			actions = append(actions, Shoot)
+		case ebiten.KeySpace:
+			actions = append(actions, BigShoot)
 		}
 
 	}

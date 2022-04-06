@@ -5,12 +5,17 @@ import (
 	"github.com/solarlune/resolv"
 )
 
+const shellTag = "shell"
+
 type Ship struct {
 	vx int
 	vy int
 
 	reloadTime int
 	reload     int
+
+	bigReloadTime int
+	bigReload     int
 
 	speed int
 }
@@ -20,16 +25,14 @@ var _ GameObject = (*Ship)(nil)
 func NewShip(x int, y int) *resolv.Object {
 	w, h := shipImg.Size()
 	obj := resolv.NewObject(float64(x), float64(y), float64(w), float64(h))
-	obj.Data = &Ship{speed: 3, reloadTime: 10}
+	obj.Data = &Ship{speed: 3, reloadTime: 10, bigReloadTime: 30}
 	return obj
 }
 
 func (s *Ship) Update(obj *resolv.Object, actions []Action) {
-	if s.reload > 0 {
-		s.reload -= 1
-	}
+	s.reload -= 1
+	s.bigReload -= 1
 
-	shooting := false
 	s.vx = 0
 	s.vy = 0
 	for _, action := range actions {
@@ -43,9 +46,14 @@ func (s *Ship) Update(obj *resolv.Object, actions []Action) {
 		case MoveDown:
 			s.vy = s.speed
 		case Shoot:
-			if s.reload == 0 {
-				shooting = true
+			if s.reload <= 0 {
+				obj.Space.Add(NewShell(obj.X, obj.Y))
 				s.reload = s.reloadTime
+			}
+		case BigShoot:
+			if s.bigReload <= 0 {
+				obj.Space.Add(NewBigExplosion(obj.X, obj.Y))
+				s.bigReload = s.bigReloadTime
 			}
 		}
 	}
@@ -58,9 +66,6 @@ func (s *Ship) Update(obj *resolv.Object, actions []Action) {
 		obj.Update()
 	}
 
-	if shooting {
-		obj.Space.Add(NewShell(obj.X, obj.Y))
-	}
 }
 
 func (s *Ship) Collision(left *resolv.Object, collision *resolv.Collision) {
@@ -81,7 +86,7 @@ type Shell struct {
 
 func NewShell(x float64, y float64) *resolv.Object {
 	w, h := shellImg.Size()
-	obj := resolv.NewObject(x, y, float64(w), float64(h), "shell")
+	obj := resolv.NewObject(x, y, float64(w), float64(h), shellTag)
 	obj.Data = &Shell{0, -shellSpeed, 0}
 	return obj
 }

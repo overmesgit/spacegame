@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20210727001814-0db043d8d5be // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hajimehoshi/ebiten/v2 v2.2.5 // indirect
 	github.com/jezek/xgb v0.0.0-20210312150743-0e0f116e1240 // indirect
 	github.com/kvartborg/vector v0.0.0-20200419093813-2cba0cabb4f0 // indirect
@@ -14,4 +15,3 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678 // indirect
 )
-
