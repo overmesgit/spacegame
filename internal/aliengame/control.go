@@ -32,7 +32,7 @@ func Control(keys []ebiten.Key) []Action {
 			vy += -1
 		case ebiten.KeyDown:
 			vy += 1
-		case ebiten.KeyZ:
+		case ebiten.KeyShift:
 			actions = append(actions, Shoot)
 		case ebiten.KeySpace:
 			actions = append(actions, BigShoot)
